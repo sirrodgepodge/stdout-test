@@ -42,7 +42,7 @@ const configuredStreamTest = universalStreamTest.getConfiguredStreamTest({
 });
 
 // example usage testing console.warn
-const consoleWarnTest = getConfiguredStreamTest({
+const consoleWarnTest = universalStreamTest.getConfiguredStreamTest({
   stream: console,
   streamActionName: 'warn'
 });
