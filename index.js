@@ -1,43 +1,70 @@
+const inBrowser = typeof window !== 'undefined';
+
 // accepts argument array of functions, runs each function one by one with console output
 module.exports = function stdOutTest(...arr) {
+  let stream;
+  if (this && this.stream) {
+    stream = this.stream;
+  } else if (inBrowser) {
+    stream = console;
+  } else {
+    stream = process.stdout;
+  }
+
+  let streamActionName;
+  if (this && this.streamActionName) {
+    streamActionName = this.streamActionName
+  } else if (inBrowser) {
+    streamActionName = 'log';
+  } else {
+    streamActionName = 'write';
+  }
+
   const arrLength = arr.length;
   let callCount = 0;
 
   return new Promise((resolve, reject) => {
     try {
-      stdOutListen(function cb(line) {
+      stdOutListen(stream, streamActionName, function cb(line) {
         try {
           arr[callCount](line);
         } catch(e) {
-          removeStdOutListeners();
+          removeStreamListeners(stream, streamActionName);
           console.log({ callCount });
           return reject(e);
         }
         if (callCount === arrLength - 1) {
-          removeStdOutListeners();
+          removeStreamListeners();
           resolve();
         } else {
           callCount++;
         }
       });
     } catch(e) {
-      removeStdOutListeners();
+      removeStreamListeners();
       console.log({ callCount });
       reject(e);
     }
   })
 }
 
-var origWrite = process.stdout.write;
-function stdOutListen(callback) {
-  process.stdout.write = (function(writeToConsole) {
+module.exports.getConfiguredStreamTest = options => module.exports.bind(options);
+
+const throwIfNotListening = () => {
+  throw new Error('universal-stream-test: tried to remove stream listeners, no currently listening stream');
+};
+var removeStreamListeners = throwIfNotListening;
+
+function stdOutListen(stream, streamActionName, callback) {
+  const origWriteStream = stream[streamActionName];
+  removeStreamListeners = () => {
+    stream[streamActionName] = origWriteStream;
+    removeStreamListeners = throwIfNotListening;
+  }
+  stream[streamActionName] = (function(writeToStream) {
     return function(string, encoding, fd) {
-      writeToConsole.apply(process.stdout, arguments)
+      writeToStream.apply(stream, arguments); // actually do write to stream still
       callback(string, encoding, fd)
     }
-  })(process.stdout.write);
-}
-
-function removeStdOutListeners() {
-  process.stdout.write = origWrite;
+  })(stream[streamActionName]);
 }
