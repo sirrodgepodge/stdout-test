@@ -36,7 +36,7 @@ By default tests 'process.stdout' if run in Node.js and 'console.log' if run in 
 ```js
 import universalStreamTest from 'universal-stream-test';
 
-const configuredStreamTest = getConfiguredStreamTest({
+const configuredStreamTest = universalStreamTest.getConfiguredStreamTest({
   stream: process.stderr, // the stream object
   streamActionName: 'write', // the name of the method on the stream object used to write to the stream
 });
