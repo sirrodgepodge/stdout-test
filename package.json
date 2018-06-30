@@ -1,0 +1,8 @@
+{
+  "name": "stdout-test",
+  "version": "1.0.0",
+  "description": "the simplest way to test your stdout/console, used to test morgan-body: https://github.com/sirrodgepodge/morgan-body/",
+  "main": "index.js",
+  "author": "Roger Beaman <rwcbeaman@gmail.com> (https://github.com/sirrodgepodge)",
+  "license": "ISC"
+}
